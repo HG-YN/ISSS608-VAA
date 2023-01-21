@@ -1,0 +1,16 @@
+---
+title: "Take Home Exercise 1"
+author: "YIN HANG"
+---
+
+# Step-by-Step Description
+
+1\. Load the *Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2022* csv file into Tableau Desktop.
+
+2\. Tabulate Female and Male population. We created a calculated field for female and male individually.
+
+3\. Create the Matrix for trellis display (3 \* 3 for 9 Planning Areas).
+
+4\. Drag AG to Rows. Female and Male to Columns. Reverse the axis of the Male population group.
+
+5\. Drag Sex to Color Marks Tab.
