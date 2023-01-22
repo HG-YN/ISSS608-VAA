@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="YIN HANG">
+<meta name="dcterms.date" content="2023-01-22">
 
 <title>ISSS608-VAA - Take Home Exercise 1</title>
 <style>
@@ -131,7 +132,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#step-by-step-description" id="toc-step-by-step-description" class="nav-link active" data-scroll-target="#step-by-step-description">Step-by-Step Description</a></li>
+  <li><a href="#step-by-step-description" id="toc-step-by-step-description" class="nav-link active" data-scroll-target="#step-by-step-description">1. Step-by-Step Description</a></li>
+  <li><a href="#major-observations" id="toc-major-observations" class="nav-link" data-scroll-target="#major-observations">2. Major Observations</a></li>
   </ul>
 </nav>
     </div>
@@ -154,6 +156,12 @@ ul.task-list li input[type="checkbox"] {
           </div>
   </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 22, 2023</p>
+    </div>
+  </div>
   
     
   </div>
@@ -161,13 +169,133 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<p>In this Take Home Exercise, we aim to analyse the demographic structure of Singapore at planning area level by building an age-sex pyramid trellis chart.</p>
 <section id="step-by-step-description" class="level1">
-<h1>Step-by-Step Description</h1>
-<p>1. Load the <em>Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2022</em> csv file into Tableau Desktop.</p>
-<p>2. Tabulate Female and Male population. We created a calculated field for female and male individually.</p>
-<p>3. Create the Matrix for trellis display (3 * 3 for 9 Planning Areas).</p>
-<p>4. Drag AG to Rows. Female and Male to Columns. Reverse the axis of the Male population group.</p>
-<p>5. Drag Sex to Color Marks Tab.</p>
+<h1>1. Step-by-Step Description</h1>
+<table class="table">
+<colgroup>
+<col style="width: 1%">
+<col style="width: 77%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>step</th>
+<th>action</th>
+<th style="text-align: center;">image</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Load the <em>Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2022</em> csv file into Tableau Desktop.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 6.52.47 PM.png" class="img-fluid" width="279"></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><p>Tabulate Female population. We created a calculated field for female population.</p>
+<p>Write a formula based on Population containing “female” word under “Sex” category to extract female population.</p></td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-21 at 4.00.37 PM.png" class="img-fluid" width="277"></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><p>Tabulate Male population. We created a calculated field for male population.</p>
+<p>Write a formula based on Population containing “male” word under “Sex” category to extract male population.</p></td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-21 at 4.11.40 PM.png" width="297" height="91"></td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Create the Matrix for trellis display (3 * 3 for 9 Planning Areas). We created a calculated field for Row calculation, and convert it to discrete.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-21 at 4.13.04 PM.png" width="297" height="100"></td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>We created a calculated field for Column calculation, and convert it to discrete.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-21 at 4.14.02 PM.png" class="img-fluid" width="284"></td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Create Age Group from AG. Combine each two adjacent age group for easier display.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 6.57.37 PM.png" class="img-fluid" width="182"></td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Drag Female Pop and Male Pop to Columns field. Edit Axis of Female Pop to be reverse.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 8.03.00 PM.png" class="img-fluid" width="276"></td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Drag AG(group) to Rows. Sort AG(group) in descending order.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 8.03.48 PM.png" class="img-fluid" width="274"></td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td><p>Drag PA into Filters and select 9 most populated planning areas.</p>
+<p>We select the 9 most populated planning areas by opening another worksheet. Drag Pop into Columns and PA into Rows. Sort Pop in descending orders. From this chart, it’s clearly seen that the top 9 most populated planning areas are: Bedok, Tampines, Jurong West, Sengkang, Woodlands, Hougang, Yishun, Choa Chu Kang, and Puggol.</p>
+<p>Delete this worksheet after obtaining the planning area information. We filter the selected 9 PA in the original worksheet.</p></td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 8.05.28 PM.png" class="img-fluid" width="278"></td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Drag PA into Details under Marks Tab</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 8.08.38 PM.png" class="img-fluid" width="129"></td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>Drag Column to Columns. Row to Rows. Edit the Table Calculation for both Row and Column. Change to “Compute using Specific Dimensions” and select PA and AG(group). Choose “At the level” to be PA. Do the same for Column.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 1.36.40 PM.png" class="img-fluid" width="164"></td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Hide the Row and Column axis by unchecking the Show Header.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 6.59.46 PM.png" class="img-fluid" width="70"></td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>Under Marks Female Pop, change the color of female population tab to be pink. That of male population to be blue.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 7.00.53 PM.png" class="img-fluid" width="77"></td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Drag Female Pop into Label of SUM(Female Pop) and Male Pop into Label of SUM(Male Pop).</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 7.01.27 PM.png" width="241" height="28"></td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td><p>Edit Axis of x axis (Female Pop and Male Pop). Choose Fixed range to be 0 to 35K.</p>
+<p>This is to make sure all population share x axis of the same range.</p></td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 7.03.14 PM.png" class="img-fluid" width="134"></td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>Create a new Dashboard. Drag the worksheet into the dashboard area.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 7.04.48 PM.png" class="img-fluid" width="155"></td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td>Add text box to show the different planning areas.</td>
+<td style="text-align: center;"><img src="images/Screenshot 2023-01-22 at 7.06.48 PM.png" class="img-fluid" width="194"></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="major-observations" class="level1">
+<h1>2. Major Observations</h1>
+<p>We have selected the most populated 9 planning areas in Singapore based on SingStat data in June 2022, namely Bedok, Tampines, Jurong West, Sengkang, Woodlands, Hougang, Yishun, Choa Chu Kang, and Puggol, for visual analysis. These 9 planning areas are chosen as we can observe population pyramid shape more clearly.</p>
+<p><strong>Similarities observed among all planning areas:</strong></p>
+<ol type="1">
+<li><p>The population pyramid in these 9 planning areas of Singapore exhibit a “constrictive” population pyramid shape, with a relatively narrow base and a wide middle portion. There are lower number of young people (&lt;19) compared to middle-aged people, implying a low fertility rate in general.</p></li>
+<li><p>There is a broad shape at top, showing a high life expectancy in Singapore, with a high proportion of elderly population(&gt;70). There is a higher number of female elderly population compared to male elderly population across all planning groups, indicating that usually female has a longer life expectancy.</p></li>
+<li><p>Male and female population are similar across all planning areas, indicating a good gender equality.</p></li>
+<li><p>These most populated planning areas all fall under Outside Central Region and are residential areas. The low residential accommodation price, and abundance of residential properties may lead to high population in these areas.</p></li>
+</ol>
+<p><br>
+<strong>Differences observed among planning areas:</strong></p>
+<ol type="1">
+<li><p>There is a narrowing base observed in Bedok, Jurong West, Woodlands, Hougang and Choa Chu Kang. This indicates a falling birth rate in these planning areas. Whereas in the other 4 planning areas, there are more population under 0-9 age group, indicating that the birth rate has improved. The most significant increase in fertility is observed in Punggol.</p></li>
+<li><p>There are differences in bulges observed in different planning areas. For example, there are significant bulges observed in Punggol and Sengkang area for population under age group 30 to 49. This could be due to residents relocation to Punggol and Sengkang for work purpose. While Bulges for Bedok are observed in 50 to 69 age group population. This may suggest that Bedok is good for retirement.</p></li>
+<li><p>There are differences in indents observed in different planning areas. For example, there are significant indents observed in Woodlands for 30 to 49 age group population. This could be due to relocation of residents. While indents for Punggol happens significantly for 20 to 29 age group population.</p></li>
+</ol>
 
 
 </section>

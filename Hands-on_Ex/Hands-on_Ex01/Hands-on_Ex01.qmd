@@ -1,6 +1,7 @@
 ---
 title: "Hands-on_Exercise 1"
 author: "YIN HANG"
+date: "`r Sys.Date()`"
 ---
 
 # Getting Started
