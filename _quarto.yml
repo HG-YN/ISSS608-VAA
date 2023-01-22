@@ -15,7 +15,7 @@ website:
       - text: "Take Home Exercise"
         menu: 
           - text: "Take Home Exercise 1"
-            file: "takehome_1.qmd"
+            file: "Take-home_Ex/Take-home_Ex01/takehome_1.qmd"
     right: 
       - href: index.qmd
         text: Home
