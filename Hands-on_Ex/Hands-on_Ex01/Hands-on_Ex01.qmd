@@ -11,7 +11,9 @@ date: "`r Sys.Date()`"
 The code chunk below uses p_load() of pacman package to check if tidyverse packages are installed. If they are, they will be launched into R.
 
 ```{r}
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse, patchwork, 
+               ggthemes, hrbrthemes,
+               ggrepel)
 ```
 
 ## Importing the data
@@ -38,6 +40,7 @@ ggplot(data = exam_data,
        aes(x = RACE)) +
   geom_bar()
 ```
+
 # Plotting a geom_dotplot
 
 ```{r}
@@ -50,6 +53,7 @@ ggplot(data=exam_data,
 ```
 
 # Plotting a geom_histogram
+
 ```{r}
 ggplot(data=exam_data, 
        aes(x= MATHS, 
@@ -57,11 +61,3 @@ ggplot(data=exam_data,
   geom_histogram(bins=20, 
                  color="grey30")
 ```
-
-
-
-
-
-
-
-
