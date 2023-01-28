@@ -61,3 +61,136 @@ ggplot(data=exam_data,
   geom_histogram(bins=20, 
                  color="grey30")
 ```
+
+Stat_summary() Method
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS, x= GENDER)) +
+  geom_boxplot() +
+  stat_summary(geom = "point",       
+               fun.y="mean",         
+               colour ="red",        
+               size=4)               
+```
+
+Add Best Fit Curve on Scatterplot
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS, y=ENGLISH)) +
+  geom_point() +
+  geom_smooth(method =lm,
+              size=0.5)
+```
+
+Small Multiple Plots with Facets
+
+facet_wrap()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS)) +
+  geom_histogram(bins=20) +
+    facet_wrap(~ CLASS)
+```
+
+facet_grid()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS, x= GENDER)) +
+  geom_boxplot() +
+    facet_grid(GENDER ~ CLASS)
+```
+
+Coordinates
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar() +
+  coord_flip()
+```
+
+Work with X, Y axis limit
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS, y=ENGLISH)) +
+  geom_point() +
+  geom_smooth(method=lm, 
+              size=0.5) +  
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100))
+```
+
+Bar Chart with Sorted Frequency
+
+```{r}
+ggplot(data=exam_data,
+       aes(x=reorder(RACE,RACE,
+                function(x)-length(x))))+
+  geom_bar() +
+  ylim(0,220) +
+  geom_text(stat="count", 
+      aes(label=paste0(..count.., ", ", 
+      round(..count../sum(..count..)*100,
+            1), "%")),
+      vjust=-1) +
+  xlab("Race") +
+  ylab("No. of\nPupils") +
+  theme(axis.title.y=element_text(angle = 0))
+```
+
+Mean and Median Line on Histogram Plot
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue") +
+  geom_vline(aes(xintercept=mean(MATHS,
+                                 na.rm=T)),
+             color="red", 
+             linetype="dashed", 
+             size=1) +
+  geom_vline(aes(xintercept=median(MATHS,
+                                  na.rm=T)),
+             color="grey30",
+             linetype="dashed", 
+             size=1)
+```
+
+Histogram with Background Chart for Comparison
+
+```{r}
+d <- exam_data   
+d_bg <- d[, -3]  
+
+ggplot(d, aes(x = ENGLISH, fill = GENDER)) +
+  geom_histogram(data = d_bg, fill = "grey", alpha = .5) +
+  geom_histogram(colour = "black") +
+  facet_wrap(~ GENDER) +
+  guides(fill = FALSE) +  
+  theme_bw()
+```
+
+A within group scatterplot with reference lines
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=MATHS, y=ENGLISH)) +
+  geom_point() +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  geom_hline(yintercept=50,
+             linetype="dashed",
+             color="grey60",
+             size=1) + 
+  geom_vline(xintercept=50, 
+             linetype="dashed",
+             color="grey60",
+             size=1)
+```

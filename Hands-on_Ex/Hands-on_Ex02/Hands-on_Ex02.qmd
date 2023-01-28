@@ -4,4 +4,83 @@ author: "YIN HANG"
 date: "`r Sys.Date()`"
 ---
 
-Creating Elegant Graphs with ggplots
+# Creating Elegant Graphs with ggplots
+
+The code chunk below uses p_load() of pacman package to check if tidyverse packages are installed. If they are, they will be launched into R.
+
+```{r}
+pacman::p_load(tidyverse, patchwork, 
+               ggthemes, hrbrthemes,
+               ggrepel)
+```
+
+## Importing the data
+
+```{r}
+exam_data <- read_csv("data/Exam_data.csv")
+```
+
+## Repel Overlapping text with geom_text_repel()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS, 
+           y=ENGLISH)) +
+  geom_point() +
+  geom_smooth(method=lm, 
+              size=0.5) +  
+  geom_label_repel(aes(label = ID), 
+                   fontface = "bold") +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  ggtitle("English scores versus Maths scores for Primary 3")
+```
+
+## Patchwork
+
+```{r}
+p1 <- ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="grey25", 
+                 fill="grey90") + 
+  coord_cartesian(xlim=c(0,100)) +
+  ggtitle("Distribution of Maths scores")
+
+p2 <- ggplot(data=exam_data, 
+             aes(x = ENGLISH)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="grey25", 
+                 fill="grey90") +
+  coord_cartesian(xlim=c(0,100)) +
+  ggtitle("Distribution of English scores")
+
+p3 <- ggplot(data=exam_data, 
+             aes(x= MATHS, 
+                 y=ENGLISH)) +
+  geom_point() +
+  geom_smooth(method=lm, 
+              size=0.5) +  
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  ggtitle("English scores versus Maths scores for Primary 3")
+
+p1 + p2 / p3
+```
+
+```{r}
+((p1/p2) | p3) + 
+  plot_annotation(tag_levels = 'I')
+```
+
+## Place a plot on top another plot
+
+```{r}
+p3 + inset_element(p2, 
+                   left = 0.02, 
+                   bottom = 0.7, 
+                   right = 0.5, 
+                   top = 1)
+```
