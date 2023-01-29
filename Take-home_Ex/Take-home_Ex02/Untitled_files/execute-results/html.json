@@ -1,0 +1,14 @@
+{
+  "hash": "d39f9fa25991d7b23dd79592981c4671",
+  "result": {
+    "markdown": "---\ntitle: \"Take-home_Ex02\"\n---\n\n\nfilter()\n\n\n::: {.cell}\n\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
