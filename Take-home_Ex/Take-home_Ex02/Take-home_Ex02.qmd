@@ -121,11 +121,12 @@ static_plot <- ggplot(population, aes(x = ifelse(Sex == "Males", yes = -Count, n
         caption = "Source: Department of Statistics Singapore, 2022") +
   xlim(-13000,13000) +
   theme(axis.text = element_text(size = 5),
+        plot.title = element_text(size = 10),
         plot.caption = element_text(size = 5)) +
   theme(axis.ticks.y = element_blank()) +
   scale_fill_manual(values = c("Males" = "steelblue", "Females" = "darksalmon"))
 
-knitr::opts_chunk$set(fig.width=30, fig.height=50) 
+knitr::opts_chunk$set(fig.width=40, fig.height=40) 
 
 static_plot
 ```
@@ -135,8 +136,8 @@ In order to make the group easy to read and also able to zoom-in for details, we
 ```{r}
 girafe(
   ggobj = static_plot,
-  width_svg = 6,
-  height_svg = 6*1.1)
+  width_svg = 5,
+  height_svg = 5*1.05)
 ```
 
 # 4. Conclusion
