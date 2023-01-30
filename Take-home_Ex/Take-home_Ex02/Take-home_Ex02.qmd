@@ -15,7 +15,7 @@ The code chunk below uses p_load() of pacman package to check if tidyverse packa
 ```{r}
 pacman::p_load(tidyverse, patchwork, 
                ggthemes, hrbrthemes,
-               ggrepel)
+               ggrepel,ggiraph)
 ```
 
 ## Importing the data
@@ -72,7 +72,7 @@ It is more visually pleasant to make graph title center aligned instead of left 
 
 ## 3.2 Data Wrangling
 
-Firstly we use filter() function to select the planning areas that the original chart has used.
+Firstly we use **filter()** function to select the planning areas that the original chart has used.
 
 ```{r}
 filtered_PA <- ppltn_data %>%
@@ -90,63 +90,53 @@ filtered_PA <- ppltn_data %>%
 Then we will compute Singapore population by planning areas, gender and age using **group_by()** function.
 
 ```{r}
-population <- filtered_PA %>%
-  group_by(AG, PA,Sex) %>%
+filtered_population <- filtered_PA %>%
+  group_by(AG,PA,Sex) %>%
   summarise('Count'= sum(`Pop`), .groups = 'drop')
 ```
 
 Secondly, we sort the data based on age group and in ascending order by using **mutate()** and **arrange()** function.
 
 ```{r}
-order <- c("0_to_4", "5_to_9", "10_to_14", "15_to_19", "20_to_24", "25_to_29", "30_to_34", "35_to_39", "40_to_44", "45_to_49", "50_to_54", "55_to_59", "60_to_64", "65_to_69", "70_to_74", "75_to_79", "80_to_84", "85_to_89", "90_and_over")
+age <- c("0_to_4", "5_to_9", "10_to_14", "15_to_19", "20_to_24", "25_to_29", "30_to_34", "35_to_39", "40_to_44", "45_to_49", "50_to_54", "55_to_59", "60_to_64", "65_to_69", "70_to_74", "75_to_79", "80_to_84", "85_to_89", "90_and_over")
 
-sorted_population <- population %>%
-  mutate(AG =  factor(AG, levels = order)) %>%
+population <- filtered_population %>%
+  mutate(AG =  factor(AG, levels = age)) %>%
   arrange(AG)
-```
-
-For better visibility, we will further group the age group.
-
-```{r}
-combined_AG <- sorted_population %>%
-  mutate(AgeGroup = dplyr::case_when(AG %in% c("0_to_4", "5_to_9") ~ "0 to 9",
-                                     AG %in% c("10_to_14", "15_to_19") ~ "10 to 19",
-                                     AG %in% c("20_to_24", "25_to_29") ~ "20 to 29",
-                                     AG %in% c("30_to_34", "35_to_39") ~ "30 to 39",
-                                     AG %in% c("40_to_44", "45_to_49") ~ "40 to 49",
-                                     AG %in% c("50_to_54", "55_to_59") ~ "50 to 59",
-                                     AG %in% c("60_to_64", "65_to_69") ~ "60 to 69",
-                                     AG %in% c("70_to_74", "75_to_79") ~ "70 to 79",
-                                     AG %in% c("80_to_84", "85_to_89") ~ "80 to 89",
-                                     AG == "90_and_over" ~ "90 and over"),
-         AgeGroup = factor(AgeGroup,
-                           level = c("0 to 9","10 to 19","20 to 29","30 to 39","40 to 49","50 to 59","60 to 69","70 to 79","80 to 89", "90 and over")))
 ```
 
 ## 3.3 Final Design
 
-Firstly, we are going to plot a trellis chart of population pyramid using **ggplot()** function.
+We have prepared data. Now we are going to plot a trellis chart of population pyramid using **ggplot()** and **facet_wrap()** function.
 
 ```{r}
-static_plot <- ggplot(combined_AG, aes(x = ifelse(Sex == "Males", yes = -Count, no = Count), 
-                            y = AgeGroup, fill = Sex)) + 
-  geom_col() +
+static_plot <- ggplot(population, aes(x = ifelse(Sex == "Males", yes = -Count, no = Count), 
+                            y = AG, fill = Sex)) + 
+  geom_col_interactive(
+    aes(tooltip= paste0(Sex,"(",AG,")"," : ",Count))) +
   facet_wrap(~ PA) +
-    scale_x_continuous(breaks = seq(-150000, 150000, 50000), 
-                     labels = paste0(as.character(c(seq(150, 0, -50), seq(50, 150, 50))))) +
-  labs (x = "Population", y = "Age Group", title='Singapore Age-Sex Population Pyramid by Planning Area 2022') +
-  theme(axis.text = element_text(size = 7)) +
+  labs (x = "Population", 
+        y = "Age Group", 
+        title='Singapore Age-Sex Population Pyramid by Planning Area',
+        caption = "Source: Department of Statistics Singapore, 2022") +
+  xlim(-13000,13000) +
+  theme(axis.text = element_text(size = 5),
+        plot.caption = element_text(size = 5)) +
   theme(axis.ticks.y = element_blank()) +
   scale_fill_manual(values = c("Males" = "steelblue", "Females" = "darksalmon"))
+
+knitr::opts_chunk$set(fig.width=30, fig.height=50) 
 
 static_plot
 ```
 
-In order to make the group easy to read and also able to zoom-in for details, we will use **plotly** to creative interactive plot.
+In order to make the group easy to read and also able to zoom-in for details, we will use **girafe()** to creative interactive plot.
 
 ```{r}
-library(plotly)
-ggplotly(static_plot)
+girafe(
+  ggobj = static_plot,
+  width_svg = 6,
+  height_svg = 6*1.1)
 ```
 
 # 4. Conclusion
