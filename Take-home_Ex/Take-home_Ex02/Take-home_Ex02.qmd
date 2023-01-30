@@ -136,8 +136,8 @@ In order to make the group easy to read and also able to zoom-in for details, we
 ```{r}
 girafe(
   ggobj = static_plot,
-  width_svg = 5,
-  height_svg = 5*1.05)
+  width_svg = 6,
+  height_svg = 6)
 ```
 
 # 4. Conclusion
