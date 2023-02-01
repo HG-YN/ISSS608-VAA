@@ -24,6 +24,7 @@ The code chunk below uses read_csv function to import the dataset: [*Singapore R
 
 ```{r}
 ppltn_data <- read_csv("data/respopagesextod2022.csv")
+head(ppltn_data)
 ```
 
 # 2. Critique
@@ -60,7 +61,7 @@ As population pyramid has shown the population absolute number in terms of verti
 
 ### b) Axes Label
 
-The Y axis label --age group, has been split into 19 categories in total (0 to 4 till 90 and over). It is visually too dense to see clearly. We can further combine the age group into range of 10 years to reduce the number of age groups and make the graph look cleaner.
+The Y axis label --age group, has been split into 19 categories in total (0 to 4 till 90 and over). It is visually too dense to see clearly. More gap should be introduced in between each age group label.
 
 ### c) Title
 
@@ -89,13 +90,15 @@ filtered_PA <- ppltn_data %>%
 
 Then we will compute Singapore population by planning areas, gender and age using **group_by()** function.
 
+We calculate the female and male population based on different age groups for the selected planning areas and put into a column named "Count".
+
 ```{r}
 filtered_population <- filtered_PA %>%
   group_by(AG,PA,Sex) %>%
   summarise('Count'= sum(`Pop`), .groups = 'drop')
 ```
 
-Secondly, we sort the data based on age group and in ascending order by using **mutate()** and **arrange()** function.
+Secondly, we sort the data based on age group and in ascending order by using **mutate()** and **arrange()** function. This is to sort the age group based on ascending order, rather than alphabetical order.
 
 ```{r}
 age <- c("0_to_4", "5_to_9", "10_to_14", "15_to_19", "20_to_24", "25_to_29", "30_to_34", "35_to_39", "40_to_44", "45_to_49", "50_to_54", "55_to_59", "60_to_64", "65_to_69", "70_to_74", "75_to_79", "80_to_84", "85_to_89", "90_and_over")
@@ -108,6 +111,14 @@ population <- filtered_population %>%
 ## 3.3 Final Design
 
 We have prepared data. Now we are going to plot a trellis chart of population pyramid using **ggplot()** and **facet_wrap()** function.
+
+Firstly we set the male population to be on the -X axis and female population to be on X axis.
+
+We use **geo_col_interactive()** function to introduce tooltip interactivity to the chart, and also eliminate population number labeling to make the chart more aesthetically appealing.
+
+Then we set the chart labels and captions using **labs()**, as well as the font size under **theme().**
+
+Lastly we mark the female and male population in different colors with **scale_fill_manual()** function.
 
 ```{r}
 static_plot <- ggplot(population, aes(x = ifelse(Sex == "Males", yes = -Count, no = Count), 
@@ -126,12 +137,14 @@ static_plot <- ggplot(population, aes(x = ifelse(Sex == "Males", yes = -Count, n
   theme(axis.ticks.y = element_blank()) +
   scale_fill_manual(values = c("Males" = "steelblue", "Females" = "darksalmon"))
 
-knitr::opts_chunk$set(fig.width=40, fig.height=40) 
+knitr::opts_chunk$set(fig.width=30, fig.height=30) 
 
 static_plot
 ```
 
 In order to make the group easy to read and also able to zoom-in for details, we will use **girafe()** to creative interactive plot.
+
+We set the width and height to make the y axis age group label easy to read.
 
 ```{r}
 girafe(
