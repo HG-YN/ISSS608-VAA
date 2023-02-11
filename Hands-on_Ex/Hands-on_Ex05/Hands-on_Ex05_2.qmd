@@ -9,7 +9,7 @@ date: "11 Feb 2023"
 ## Install and Launch R Packages
 
 ```{r}
-pacman::p_load(seriation, dendextend, heatmaply, tidyverse)
+pacman::p_load(seriation, dendextend, heatmaply, tidyverse, GGally, parallelPlot)
 ```
 
 ```{r}
@@ -88,4 +88,11 @@ heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
           xlab = "World Happiness Indicators",
           ylab = "World Countries"
           )
+```
+
+# Plot Static Parallel Coordinate
+
+```{r}
+ggparcoord(data = wh, 
+           columns = c(7:12))
 ```
