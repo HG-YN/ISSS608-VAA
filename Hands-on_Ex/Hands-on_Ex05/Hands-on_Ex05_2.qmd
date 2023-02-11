@@ -12,8 +12,6 @@ date: "11 Feb 2023"
 pacman::p_load(seriation, dendextend, heatmaply, tidyverse, GGally, parallelPlot)
 ```
 
-aaabbbccc
-
 ```{r}
 wh <- read_csv("data/WHData-2018.csv")
 ```
