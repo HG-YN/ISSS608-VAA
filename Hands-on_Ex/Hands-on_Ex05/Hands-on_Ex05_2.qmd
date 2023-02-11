@@ -96,3 +96,15 @@ heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
 ggparcoord(data = wh, 
            columns = c(7:12))
 ```
+
+Plot Parallel coordinates with boxplot
+
+```{r}
+ggparcoord(data = wh, 
+           columns = c(7:12), 
+           groupColumn = 2,
+           scale = "uniminmax",
+           alphaLines = 0.2,
+           boxplot = TRUE, 
+           title = "Parallel Coordinates Plot of World Happines Variables")
+```
