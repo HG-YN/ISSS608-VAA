@@ -1,0 +1,36 @@
+---
+title: "Take-home_Ex03"
+author: "YIN HANG"
+date: "14 Feb 2023"
+---
+
+In this take-home exercise, we will look into the salient patterns of the resale prices of public housing property by residential towns and estates in Singapore.
+
+# 1. R Preparation
+
+## Install and launching R packages
+
+The code chunk below uses p_load() of pacman package to check if tidyverse packages are installed. If they are, they will be launched into R.
+
+```{r}
+pacman::p_load(tidyverse, patchwork, 
+               ggthemes, hrbrthemes,
+               ggrepel,ggiraph)
+```
+
+## Importing the data
+
+The code chunk below uses read_csv function to import the dataset: [*Resale flat princes based on registration date from Jan-2017 onwards*]{.underline}.
+
+Data is from [Data.gov.sg](https://data.gov.sg/).
+
+```{r}
+property_data <- read_csv("data/resale-flat-prices-based-on-registration-date-from-jan-2017-onwards.csv")
+head(property_data)
+```
+
+# Analytical Visualisation Selection
+
+# Procedures for Analytical Visualisation
+
+# Patterns Reveal

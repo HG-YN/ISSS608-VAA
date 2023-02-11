@@ -1,0 +1,91 @@
+---
+title: "Hands-on_Ex05_2"
+author: "YIN HANG"
+date: "11 Feb 2023"
+---
+
+# Heatmap
+
+## Install and Launch R Packages
+
+```{r}
+pacman::p_load(seriation, dendextend, heatmaply, tidyverse)
+```
+
+```{r}
+wh <- read_csv("data/WHData-2018.csv")
+```
+
+Change row number by country name
+
+```{r}
+row.names(wh) <- wh$Country
+```
+
+Transform data frame into matrix
+
+```{r}
+wh1 <- dplyr::select(wh, c(3, 7:12))
+wh_matrix <- data.matrix(wh)
+```
+
+Heatmap() of R Stats
+
+```{r}
+wh_heatmap <- heatmap(wh_matrix,
+                      Rowv=NA, Colv=NA)
+```
+
+Plot a cluster heatmap
+
+```{r}
+wh_heatmap <- heatmap(wh_matrix)
+```
+
+Normalise matric column-wise
+
+```{r}
+wh_heatmap <- heatmap(wh_matrix,
+                      scale="column",
+                      cexRow = 0.6, 
+                      cexCol = 0.8,
+                      margins = c(10, 4))
+```
+
+## Create Interactive heatmap
+
+There are a few ways to transform the data.
+
+There are scaling method, normalising method and percentage method
+
+```{r}
+heatmaply(wh_matrix[,-c(1,2,4,5)],
+          scale = "column")
+
+```
+
+```{r}
+heatmaply(normalize(wh_matrix[,-c(1,2,4,5)]))
+
+```
+
+```{r}
+heatmaply(percentize(wh_matrix[, -c(1, 2, 4, 5)]))
+```
+
+Further spread out
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          Colv=NA,
+          seriate = "none",
+          colors = Blues,
+          k_row = 5,
+          margins = c(NA,200,60,NA),
+          fontsize_row = 4,
+          fontsize_col = 5,
+          main="World Happiness Score and Variables by Country, 2018 \nDataTransformation using Normalise Method",
+          xlab = "World Happiness Indicators",
+          ylab = "World Countries"
+          )
+```

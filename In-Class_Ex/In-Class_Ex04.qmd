@@ -10,7 +10,7 @@ execute:
 editor: visual
 ---
 
-# Getting Started 
+# Getting Started
 
 Load the packages
 

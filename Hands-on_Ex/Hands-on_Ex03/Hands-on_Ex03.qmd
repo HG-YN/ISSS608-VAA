@@ -1,0 +1,93 @@
+---
+title: "Hands-on_Ex05"
+author: "YIN HANG"
+date: "11 Feb 2023"
+---
+
+# Visualising Correlation Matrices
+
+## Install and Launch R Packages
+
+```{r}
+pacman::p_load(corrplot, tidyverse, ggtern, plotly)
+```
+
+# Ternary Plot
+
+Analysis with 3 variables with ggtern() to build ternary plot
+
+```{r}
+pop_data <- read_csv("data/respopagsex2000to2018_tidy.csv") 
+```
+
+**DATA PREPARATION**
+
+Using mutate() function from dplyr package to derive 3 new measures: young, active and old.
+
+```{r}
+agpop_mutate <- pop_data %>%
+  mutate(`Year` = as.character(Year)) %>%
+  spread(AG, Population) %>%  # new function is pivot()
+  mutate(YOUNG = rowSums(.[4:8])) %>%
+  mutate(ACTIVE = rowSums(.[9:16])) %>%
+  mutate(OLD = rowSums(.[17:21])) %>%
+  mutate(TOTAL = rowSums(.[21:24])) %>%
+  filter(Year == 2018) %>%
+  filter(TOTAL > 0) 
+  #%>%
+  #select(PA,SZ,YOUNG,ACTIVE,OLD,TOTAL)
+```
+
+## Plot a static ternary diagram
+
+### Using ggtern() function
+
+```{r}
+ggtern(data=agpop_mutate,aes(x=YOUNG,y=ACTIVE, z=OLD)) +
+  geom_point() +
+  labs(title="Population structure, 2015") +
+  theme_rgbw()
+```
+
+## Plot an interactive ternary diagram
+
+### Using plot_ly() function
+
+```{r}
+label <- function(txt) {
+  list(
+    text = txt, 
+    x = 0.1, y = 1,
+    ax = 0, ay = 0,
+    xref = "paper", yref = "paper", 
+    align = "center",
+    font = list(family = "serif", size = 15, color = "white"),
+    bgcolor = "#b3b3b3", bordercolor = "black", borderwidth = 2
+  )
+}
+
+axis <- function(txt) {
+  list(
+    title = txt, tickformat = ".0%", tickfont = list(size = 10)
+  )
+}
+
+ternaryAxes <- list(
+  aaxis = axis("Young"), 
+  baxis = axis("Active"), 
+  caxis = axis("Old")
+)
+
+plot_ly(
+  agpop_mutate, 
+  a = ~YOUNG, 
+  b = ~ACTIVE, 
+  c = ~OLD, 
+  color = I("black"), 
+  type = "scatterternary"
+) %>%
+  layout(
+    annotations = label("Ternary Markers"), 
+    ternary = ternaryAxes
+  )
+```
