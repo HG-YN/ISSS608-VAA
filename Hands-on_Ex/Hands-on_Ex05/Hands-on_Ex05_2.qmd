@@ -6,7 +6,7 @@ date: "11 Feb 2023"
 
 # Heatmap
 
-## Install and Launch R Packages
+## Install and Launch R Packages using pacman
 
 ```{r}
 pacman::p_load(seriation, dendextend, heatmaply, tidyverse, GGally, parallelPlot)
