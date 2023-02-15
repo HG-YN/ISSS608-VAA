@@ -2,6 +2,12 @@
 title: "Take-home_Ex03"
 author: "YIN HANG"
 date: "14 Feb 2023"
+date-modified: "`r Sys.Date()`"
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
 ---
 
 In this take-home exercise, we will look into the salient patterns of the resale prices of public housing property by residential towns and estates in Singapore.
@@ -10,27 +16,318 @@ In this take-home exercise, we will look into the salient patterns of the resale
 
 ## Install and launching R packages
 
-The code chunk below uses p_load() of pacman package to check if tidyverse packages are installed. If they are, they will be launched into R.
+The code chunk below uses p_load() of pacman package to check if the necessary packages are installed. If they are, they will be launched into R.
 
 ```{r}
-pacman::p_load(tidyverse, patchwork, 
-               ggthemes, hrbrthemes,
-               ggrepel,ggiraph)
+pacman::p_load(tidyverse, dplyr, ggplot2,ggstatsplot, performance, plotly, crosstalk, DT, ggdist, gganimate,FunnelPlotR, knitr)
 ```
 
 ## Importing the data
 
-The code chunk below uses read_csv function to import the dataset: [*Resale flat princes based on registration date from Jan-2017 onwards*]{.underline}.
+The code chunk below uses *read_csv* function to reads the CSV file into a data frame named *property_data*.
+
+The dataset: [*Resale flat princes based on registration date from Jan-2017 onwards*]{.underline}.
 
 Data is from [Data.gov.sg](https://data.gov.sg/).
 
 ```{r}
 property_data <- read_csv("data/resale-flat-prices-based-on-registration-date-from-jan-2017-onwards.csv")
-head(property_data)
 ```
 
-# Analytical Visualisation Selection
+## Data Exploration and Analytical Visualisation Selection
 
-# Procedures for Analytical Visualisation
+Firstly, we will need to understand the data attributes in the selected data set:
 
-# Patterns Reveal
+| Data Attributes     | Data Type |
+|---------------------|-----------|
+| month               | datetime  |
+| town                | text      |
+| flat type           | text      |
+| block               | text      |
+| street name         | text      |
+| storey range        | text      |
+| floor area sqm      | numeric   |
+| flat model          | text      |
+| lease commence date | datetime  |
+| remaining lease     | text      |
+| resale price        | numeric   |
+
+We can also run *summary()* to get a glance of the data set.
+
+```{r}
+summary(property_data)
+```
+
+(Describe the selection and designed consideration of the analytical data visualisation used. The discussion should limit to not more than 150 words each.)
+
+In this take-home exercise, we will focus on **3, 4, 5 Room HDB in the study period of 2022.** Hence from the above, some consideration of the visualization analysis are:
+
+-   Resale price by 2 different flat type. We choose standard and DBSS in this exercise.
+
+-   Resale price by flat type, which is 3, 4 or 5 Room HDB.
+
+-   Transaction volume by flat types
+
+-   Resale price by town
+
+-   Transaction volume by town
+
+-   Resale price and floor area, with different colors or shapes representing different towns
+
+-   Uncertainty Analysis
+
+## Analytical Visualisation Preparation
+
+### Data preparation
+
+We use filter function from *dplyr()* package to extract rows that satisfy the given criteria.
+
+-   extracts rows where the first four characters of "month" column are "2022" to make 2022 as the study period
+
+-   extract "flat_type" column whereby is "3 Room" ,"4 Room" or "5 Room".
+
+-   extract "flat_model" column to be "Standard" or "DBSS" HDB.
+
+    The resulting filtered data is stored in a new data frame named *filtered_data*
+
+```{r}
+filtered_data <- property_data %>%
+  filter(substr(month, 1, 4) == "2022", flat_type %in% c("3 ROOM", "4 ROOM","5 ROOM"), flat_model %in% c("Standard","DBSS") )
+```
+
+As the flat_type is in text format, we extract numeric part of flat_type column using *mutate()* in order to use it for chart plotting.
+
+```{r}
+filtered_data <- filtered_data %>% mutate(flat_type_num = str_extract(flat_type, "\\d+"))
+```
+
+### Flat Model (Standard VS DBSS) Resale Price Comparison with Two-sample Mean Test
+
+As DBSS flats are built by private developers with each development characterised by unique external features, it is usually a preferred choice for potential buyers. Hence we would like to compare it's resale price compared to standard HDB via two-sample mean test, and understand roughly how much premium is required for DBSS flat.
+
+In the code chunk below, *ggbetweenstats()* is used to build a visual for two-sample mean test of resale price by flat model, namely DBSS and Standard.
+
+```{r}
+ggbetweenstats(
+  data = filtered_data,
+  x = flat_model, 
+  y = resale_price,
+  type = "np",
+  messages = FALSE
+)
+```
+
+We can observe from the above chart, DBSS flat resale price mean is at 758K, compared to that of standard HDB at 405K. There are fewer transactions of DBSS in 2022 (in total 395) compared to standard (in total 657). This could be due to more standard HDB flats in the market.
+
+### Resale Price by Town
+
+As now we know that there is a significant difference in resale price between DBSS and Standard HDB, we will narrow down the scope to Standard flat model in order to reduce the number of variables. This will help us to understand the relationship between resale price with other affecting factors, such as town, sqm and flat type better.
+
+Hence, we create another tibble data, standard_data for Standard HDB flat model.
+
+```{r}
+standard_data <- filtered_data %>%
+  filter(flat_model == ("Standard") )
+```
+
+### Average Resale Price by Town
+
+Use a geom_bar() in ggplot() package to plot a simple bar chart to compare the average resale price of different towns.
+
+Use plotly() to add interactivity to show town name and average resale price of the selected town.
+
+```{r}
+bar_chart <- ggplot(standard_data, aes(x = town, y = resale_price)) +
+  geom_bar(stat = "summary", fun = "mean") +
+  labs(x = "Town", y = "Average Resale Price") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  ggtitle("Average Resale Price by Town")
+
+bar_chart <- ggplotly(bar_chart, tooltip = c("town", "resale_price"))
+
+bar_chart
+```
+
+From the bar chart, we can observe that the top 3 town based on average resale price are: Bukit Timah, Marine Parade and Clementi. The bottom 3 are: Geylang, Toa Payoh and Kallang/ Whampoa.
+
+Before jumping into conclusion, it is also important to conduct a Uncertainty Test for resale price.
+
+### **Visualizing the Uncertainty of Point Estimates**
+
+We create another tibble data, *my_sum*, to calculate the mean, standard deviation and standard error of resale price in *standard_data*.
+
+```{r}
+my_sum <- standard_data %>%
+  group_by(town) %>%
+  summarise(
+    n=n(),
+    mean=mean(resale_price),
+    sd=sd(resale_price)
+    ) %>%
+  mutate(se=sd/sqrt(n-1))
+```
+
+Then we use *geom_errorbar()* function from *ggplot()* package. We are able to visualise clearly the resale price standard error and the mean resale price indicated by a red dot for different town.
+
+Then convert it to a plotly object using *ggplotly()* function.
+
+```{r}
+errorbar_plot <- ggplot(my_sum) +
+  geom_errorbar(
+    aes(x=town, 
+        ymin=mean-se, 
+        ymax=mean+se)) +
+  xlab("town") +
+  ylab("resale price standard error with mean") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+    geom_point(aes
+           (x=town, 
+            y=mean), 
+           stat="identity", 
+           color="red",
+           size = 0.5,
+           alpha=1) +
+  facet_wrap(~ town) +
+  ggtitle("Standard Error of Mean Resale Price by Town")
+
+p_interactive <- ggplotly(errorbar_plot)
+
+p_interactive
+```
+
+### Resale Price by Floor Area in Different Towns
+
+After understanding the differences in average resale prices in various towns, we now add floor area (sqm) into consideration. We look at individual transaction resale price rather than average for this case.
+
+We use geom_point() from ggplot2 package to create a scatter plot to explore the relationship between resale price and floor area, with different colors or shapes representing different towns or estates.
+
+```{r}
+scatter_plot <- ggplot(standard_data, aes(x = floor_area_sqm, y = resale_price, color = town)) +
+  geom_point() +
+  labs(x = "Floor Area (sqm)", y = "Resale Price", color = "Town") +
+  ggtitle("Scatter plot of Resale Price vs. Floor Area by Town")
+
+scatter_plot <- ggplotly(scatter_plot, tooltip = c("town","floor_area_sqm", "resale_price"))
+
+scatter_plot
+```
+
+We observe that even though Bukit Timah has the highest average resale price, the top 3 resale price transactions are for HDB in Maria Parade.
+
+The common assumption is the bigger the floor area, the higher the resale price. In order to understand more about the correlation between floor area sqm and resale price, we will run a Significant Test of Correlation.
+
+### Significant Test of Correlation
+
+In the code chunk below, *ggscatterstats()* is used to build a visual for Significant Test of Correlation between floor area (sqm) and resale price (S\$).
+
+```{r}
+ggscatterstats(
+  data = standard_data,
+  x = floor_area_sqm,
+  y = resale_price,
+  marginal = FALSE,
+  )
+```
+
+From the above t-test, we see a general linear correlation between floor area (sqm) VS resale price.
+
+However, the r value is not very high and there are some points fall far away from the linear line.
+
+We suspect it might due to different location and flat type.
+
+Hence now we will narrow down to the same location and flat type.
+
+```{r}
+geylang_data <- standard_data %>%
+  filter(town == ("GEYLANG"), flat_type == ("3 ROOM") )
+```
+
+Then we build another Significant Test of Correlation between floor area (sqm) and resale price (S\$).
+
+```{r}
+ggscatterstats(
+  data = geylang_data,
+  x = floor_area_sqm,
+  y = resale_price,
+  marginal = FALSE,
+  )
+```
+
+The correlation is even lower. So town location and flat type may not be the most important factor.
+
+As there is no clear correlation found, we will continue the exploration by looking into Multiple regression model.
+
+### Multiple Regression Model
+
+```{r}
+model <- lm(resale_price ~ floor_area_sqm + lease_commence_date + flat_type_num, data = standard_data)
+
+summary(model)
+```
+
+### **Model Diagnostic: checking for multicolinearity**
+
+```{r}
+check_collinearity(model)
+```
+
+### **Model Diagnostic: Complete check**
+
+```{r}
+check_model(model)
+```
+
+### Resale Price Distribution by Flat Type in Different Towns
+
+We use geom_boxplot() under ggplot() package to create a box plot.
+
+This helps in visualising the distribution of resale prices for different flat types and towns.
+
+```{r}
+box_plot <- ggplot(standard_data, aes(x = flat_type, y = resale_price)) +
+  geom_boxplot() +
+  labs(x = "Flat Type", y = "Resale Price") +
+  ggtitle("Resale Price Distribution by Flat Type")
+
+box_plot <- ggplotly(box_plot, tooltip = "resale_price")
+
+box_plot
+```
+
+Generally, the average resale price is highest for 5 Room, followed by 4 Room and 3 Room.
+
+There are a few outliers for 3 Room flat resale prices.
+
+The resale prices for 4 Room flat are closely distributed.
+
+The resale price range for 5 Room flat are the biggest.
+
+### Heatmap Visualization on Resale Price, Floor Area sqm and Lease Commence Date
+
+We use geom_tile() from ggplot() to plot a heatmap to visualize the correlation between different variables, such as resale price, floor area, and lease commence date/ year.
+
+```{r}
+heatmap <- ggplot(standard_data, aes(x = factor(lease_commence_date), y = factor(floor_area_sqm), fill = resale_price)) +
+  geom_tile() +
+  labs(x = "Lease Commence Year", y = "Floor Area (sqm)", fill = "Resale Price") +
+  ggtitle("Heatmap of Correlation between Resale Price, Floor Area, and Year")
+
+ggsave("heatmap.png", heatmap, height = 8, units = "in")
+```
+
+![](heatmap.png)
+
+## Patterns Reveal
+
+When doing a visual analysis of HDB resale price in Singapore, it is important to visualize the uncertainty of the estimates in addition to the estimates themselves. This is because the resale price of HDB flats is influenced by various factors, such as location, age of the flat, size of the flat, and various market conditions. These factors can lead to considerable uncertainty in the estimated resale price.
+
+By visualizing the uncertainty, we can gain a better understanding of the range of possible values that the true resale price could take, given our data and assumptions.
+
+One way to visualize uncertainty is by using error bars, which can show the range of values that the estimate is likely to fall within, given a certain level of confidence or probability.
+
+Visualizing uncertainty also helps to identify outliers or extreme values that may have a significant impact on the estimates, as well as potential sources of bias or error in the data or methodology used to generate the estimates. It can also help to highlight areas where further research or data collection may be needed to improve the accuracy and reliability of the estimates.
+
+In summary, visualizing uncertainty is an important part of any data analysis, as it helps to provide a more complete and accurate picture of the data and the estimates that are derived from it.
