@@ -10,7 +10,7 @@ execute:
 editor: visual
 ---
 
-In this take-home exercise, we will look into the salient patterns of the resale prices of public housing property by residential towns and estates in Singapore.
+In this take-home exercise, we will look into the patterns of the resale prices of public housing property by residential towns and estates in Singapore.
 
 # 1. R Preparation
 
@@ -58,23 +58,18 @@ We can also run *summary()* to get a glance of the data set.
 summary(property_data)
 ```
 
-(Describe the selection and designed consideration of the analytical data visualisation used. The discussion should limit to not more than 150 words each.)
+In this take-home exercise, we will focus on **3, 4, 5 Room HDB in the study period of 2022.**
 
-In this take-home exercise, we will focus on **3, 4, 5 Room HDB in the study period of 2022.** Hence from the above, some consideration of the visualization analysis are:
+In order to explore the patterns of the resale prices of public housing property by residential towns and estates in Singapore, there are a few possible affecting factors we can analyse, namely: town, flat type, floor area sqm, flat model and lease commence date/ remaining lease.
 
--   Resale price by 2 different flat type. We choose standard and DBSS in this exercise.
+Hence from the above, some consideration of the visualization analysis are:
 
--   Resale price by flat type, which is 3, 4 or 5 Room HDB.
-
--   Transaction volume by flat types
-
--   Resale price by town
-
--   Transaction volume by town
-
--   Resale price and floor area, with different colors or shapes representing different towns
-
--   Uncertainty Analysis
+1.  Look into the resale price by 2 different flat midels. We choose standard and DBSS in this exercise. We can build a Two-Sample-Mean-Test to do the comparison.
+2.  Then we can focus on standard HDB flat model to do a fair comparison on how other factors affect the resale price. We firstly look at Resale price by town as location is one of the most important factor. We will firstly create a bar chart to show average resale price by town. Then we will do an uncertainty of point estimate to understand the reliability and accuracy of the estimates generated.
+3.  Then we start to explore resale price by floor area sqm. We use a scatter plot to visualise the pattern distribution first. Then we conduct a significant test of correlation to understand on their correlation relationship.
+4.  As there are a few possible affecting factors, namely: town, flat type, floor area sqm and lease commence date/ remaining lease, we will run a multiple regression model with these factors against resale price to see which factor(s) has/ have higher correlation.
+5.  Then we look at flat type (3, 4 or 5 Room HDB) and resale price by using box plot
+6.  Lastly we build a heatmap
 
 ## Analytical Visualisation Preparation
 
@@ -117,6 +112,8 @@ ggbetweenstats(
 )
 ```
 
+[Pattern Observation]{.underline}
+
 We can observe from the above chart, DBSS flat resale price mean is at 758K, compared to that of standard HDB at 405K. There are fewer transactions of DBSS in 2022 (in total 395) compared to standard (in total 657). This could be due to more standard HDB flats in the market.
 
 ### Resale Price by Town
@@ -148,6 +145,8 @@ bar_chart <- ggplotly(bar_chart, tooltip = c("town", "resale_price"))
 
 bar_chart
 ```
+
+[Pattern Observation]{.underline}
 
 From the bar chart, we can observe that the top 3 town based on average resale price are: Bukit Timah, Marine Parade and Clementi. The bottom 3 are: Geylang, Toa Payoh and Kallang/ Whampoa.
 
@@ -198,6 +197,12 @@ p_interactive <- ggplotly(errorbar_plot)
 p_interactive
 ```
 
+[Pattern Observation]{.underline}
+
+The above uncertainty of point estimates trellis chart show the range of resale price that the estimate is likely to fall within, with 95% level of confidence.
+
+We can see that the variability in resale price in Clementi is the largest. Whereas in towns such as Bedok, Hougang, Jurong West and Woodlands, there is not much variability in the mean resale price. This will lead to easier price prediction in these regions.
+
 ### Resale Price by Floor Area in Different Towns
 
 After understanding the differences in average resale prices in various towns, we now add floor area (sqm) into consideration. We look at individual transaction resale price rather than average for this case.
@@ -214,6 +219,8 @@ scatter_plot <- ggplotly(scatter_plot, tooltip = c("town","floor_area_sqm", "res
 
 scatter_plot
 ```
+
+[Pattern Observation]{.underline}
 
 We observe that even though Bukit Timah has the highest average resale price, the top 3 resale price transactions are for HDB in Maria Parade.
 
@@ -232,35 +239,17 @@ ggscatterstats(
   )
 ```
 
-From the above t-test, we see a general linear correlation between floor area (sqm) VS resale price.
+[Pattern Observation]{.underline}
 
-However, the r value is not very high and there are some points fall far away from the linear line.
+From the above t-test with sample size of 657 transactions, we see a linear correlation between floor area (sqm) VS resale price. The correlation coefficient, r(pearson) = 0.87, indicating a positive linear relationship between floor area (sqm) and resale price. The small p value indicates statistic significance.
 
-We suspect it might due to different location and flat type.
+However, there are still outliers which fall far away from the linear regression line.
 
-Hence now we will narrow down to the same location and flat type.
-
-```{r}
-geylang_data <- standard_data %>%
-  filter(town == ("GEYLANG"), flat_type == ("3 ROOM") )
-```
-
-Then we build another Significant Test of Correlation between floor area (sqm) and resale price (S\$).
-
-```{r}
-ggscatterstats(
-  data = geylang_data,
-  x = floor_area_sqm,
-  y = resale_price,
-  marginal = FALSE,
-  )
-```
-
-The correlation is even lower. So town location and flat type may not be the most important factor.
-
-As there is no clear correlation found, we will continue the exploration by looking into Multiple regression model.
+Hence we will continue the exploration by looking into Multiple regression model to consider other factors.
 
 ### Multiple Regression Model
+
+We will add in lease commence date and flat type into the model and build a multiple regression model. This is to analyse how these other factors affecting the resale price besides floor area.
 
 ```{r}
 model <- lm(resale_price ~ floor_area_sqm + lease_commence_date + flat_type_num, data = standard_data)
@@ -268,17 +257,19 @@ model <- lm(resale_price ~ floor_area_sqm + lease_commence_date + flat_type_num,
 summary(model)
 ```
 
-### **Model Diagnostic: checking for multicolinearity**
+[Pattern Observation]{.underline}
+
+From the small p-value, we know that at least one of the factors are affecting the resale price significantly. The R-squared value, 0.7737 shows a generally good fit of the model. But before concluding whether this is a good regression model, we will need to check for multicolinearity.
+
+### **Model Diagnostic: Checking for Multicolinearity**
 
 ```{r}
 check_collinearity(model)
 ```
 
-### **Model Diagnostic: Complete check**
+[Pattern Observation]{.underline}
 
-```{r}
-check_model(model)
-```
+From the Multicollinearity check, we know that floor area sqm is a good predictor variable as it has a low correlation. However, the lease commence date and flat type have high correlation. Hence we might need to analyse them separately.
 
 ### Resale Price Distribution by Flat Type in Different Towns
 
@@ -297,17 +288,21 @@ box_plot <- ggplotly(box_plot, tooltip = "resale_price")
 box_plot
 ```
 
+[Pattern Observation]{.underline}
+
 Generally, the average resale price is highest for 5 Room, followed by 4 Room and 3 Room.
 
-There are a few outliers for 3 Room flat resale prices.
+There are the most number of outliers for 3 Room flat resale prices, meaning some transaction of 3 Room flat sell at very high prices.
 
-The resale prices for 4 Room flat are closely distributed.
+The resale prices for 4 Room flat are closely distributed, the variability is the smallest.
 
 The resale price range for 5 Room flat are the biggest.
 
 ### Heatmap Visualization on Resale Price, Floor Area sqm and Lease Commence Date
 
-We use geom_tile() from ggplot() to plot a heatmap to visualize the correlation between different variables, such as resale price, floor area, and lease commence date/ year.
+With all the above analysis, now we want to build a heatmap to visualize at a glance.
+
+We use geom_tile() from ggplot() to plot a heatmap to visualize between different variables, such as resale price, floor area, and lease commence date/ year.
 
 ```{r}
 heatmap <- ggplot(standard_data, aes(x = factor(lease_commence_date), y = factor(floor_area_sqm), fill = resale_price)) +
@@ -320,14 +315,12 @@ ggsave("heatmap.png", heatmap, height = 8, units = "in")
 
 ![](heatmap.png)
 
-## Patterns Reveal
+[Pattern Observation]{.underline}
 
-When doing a visual analysis of HDB resale price in Singapore, it is important to visualize the uncertainty of the estimates in addition to the estimates themselves. This is because the resale price of HDB flats is influenced by various factors, such as location, age of the flat, size of the flat, and various market conditions. These factors can lead to considerable uncertainty in the estimated resale price.
+We can see when taking lease commence year and floor area, generally the newer the flat (later lease commence year) and bigger the size (bigger floor area), the higher the resale price (lighter in blue color tone). However there are also some outliers.
 
-By visualizing the uncertainty, we can gain a better understanding of the range of possible values that the true resale price could take, given our data and assumptions.
+Hence it is really not enough to look at one aspect of the HDB property to predict the price, all these factors: town, flat type, floor area sqm, flat model and lease commence date/ remaining lease, play a part in influencing the resale price.
 
-One way to visualize uncertainty is by using error bars, which can show the range of values that the estimate is likely to fall within, given a certain level of confidence or probability.
+The above concludes my Take Home Exercise 3.
 
-Visualizing uncertainty also helps to identify outliers or extreme values that may have a significant impact on the estimates, as well as potential sources of bias or error in the data or methodology used to generate the estimates. It can also help to highlight areas where further research or data collection may be needed to improve the accuracy and reliability of the estimates.
-
-In summary, visualizing uncertainty is an important part of any data analysis, as it helps to provide a more complete and accurate picture of the data and the estimates that are derived from it.
+Thank you for reading!
