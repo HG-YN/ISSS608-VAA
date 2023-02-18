@@ -25,7 +25,7 @@ pacman::p_load(scales, viridis, lubridate, ggthemes, gridExtra, tidyverse, readx
 
 For the purpose of this hands-on exercise, *eventlog.csv* file will be used. This data file consists of 199,999 rows of time-series cyber attack records by country.
 
-First, you will use the code chunk below to import *eventlog.csv* file into R environment and called the data frame as *attacks*.
+import *eventlog.csv* file into R environment and called the data frame as *attacks*.
 
 ```{r}
 attacks <- read_csv("data/eventlog.csv")
@@ -33,7 +33,7 @@ attacks <- read_csv("data/eventlog.csv")
 
 ### Examining the data structure
 
-For example, *kable()* can be used to review the structure of the imported data frame.
+*kable()* can be used to review the structure of the imported data frame.
 
 ```{r echo=FALSE}
 kable(head(attacks))
@@ -81,7 +81,7 @@ attacks <- attacks %>%
       hour, levels = 0:23))
 ```
 
-Note: Beside extracting the necessary data into *attacks* data frame, `mutate()` of **dplyr** package is used to convert *wkday* and *hour* fields into **factor** so they'll be ordered when plotting
+`mutate()` of **dplyr** package is used to convert *wkday* and *hour* fields into **factor** so they'll be ordered when plotting
 
 Table below shows the tidy tibble table after processing.
 
@@ -121,7 +121,7 @@ theme(axis.ticks = element_blank(),
 
 Step 1: Deriving attack by country object
 
-In order to identify the top 4 countries with the highest number of attacks, you are required to do the followings:
+In order to identify the top 4 countries with the highest number of attacks, we need to:
 
 -   count the number of attacks by country,
 
@@ -138,7 +138,7 @@ In order to identify the top 4 countries with the highest number of attacks, you
 
 Step 2: Preparing the tidy data frame
 
-In this step, you are required to extract the attack records of the top 4 countries from *attacks* data frame and save the data in a new tibble data frame (i.e. *top4_attacks*).
+extract the attack records of the top 4 countries from *attacks* data frame and save the data in a new tibble data frame (i.e. *top4_attacks*).
 
 ```{r}
 top4 <- attacks_by_country$source_country[1:4]
@@ -227,7 +227,7 @@ hline.data <- Vietnam %>%
 
 ### Plotting the cycle plot
 
-The code chunk below is used to plot the cycle plot as shown in Slide 12/23.
+The code chunk below is used to plot the cycle plot
 
 ```{r eval=FALSE}
 ggplot() + 
