@@ -1,0 +1,61 @@
+---
+title: "Hands-on_Ex07"
+author: "YIN HANG"
+format: html
+date: "25 Feb 2023"
+date-modified: "`r Sys.Date()`"
+execute:
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+## Getting Started
+
+Load the code chunk to check whether the following packages has been installed.
+
+```{r}
+# sf is the updated version of sp
+pacman::p_load(sf, tmap, tidyverse)
+```
+
+### **Importing Geospatial Data into R**
+
+The code chunk below uses the *st_read()* function of **sf** package to import shapefile into R as a simple feature data frame called mpsz
+
+```{r}
+mpsz <- st_read(dsn = "data/geospatial", 
+                layer = "MP14_SUBZONE_WEB_PL")
+```
+
+# 
+
+**Visualising Geospatial Point Data**
+
+### Data Loading
+
+```{r}
+sgpools <- read_csv("data/aspatial/SGPools_svy21.csv")
+
+#long, lap (x,y)
+sgpools_sf <- st_as_sf(sgpools, 
+                       coords = c("XCOORD", "YCOORD"),
+                       crs= 3414)  #EPSG:3414; SVY21 (Coorinate ref System)
+
+```
+
+Create the map
+
+```{r}
+tmap_mode("view")
+
+#circle plot with tm_bubbles()
+tm_shape(sgpools_sf)+
+  tm_bubbles(col = "red",
+             size = 1,
+             border.col = "black",
+             border.lwd = 1)
+  
+  tmap_mode("plot")
+```
