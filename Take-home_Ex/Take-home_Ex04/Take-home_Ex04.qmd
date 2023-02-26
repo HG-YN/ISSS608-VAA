@@ -13,58 +13,62 @@ editor: visual
 
 ## Getting Started
 
-Load the code chunk to check whether the following packages has been installed.
+In this Take-Home Exercise 4, we are using Merchandise Trade by Region/Market provided by Department of Statistics, Singapore (DOS) to study the impact of COVID-19 as well as the global economic and political dynamic in 2022 on Singapore bi-lateral trade.
+
+Firstly, we load the code chunk to check whether the following packages has been installed.
 
 ```{r}
-pacman::p_load(scales, viridis, lubridate, ggthemes, gridExtra, tidyverse, readxl, knitr, data.table, readxl, lubridate, stringr, dplyr, gganimate, transformr, patchwork,magick,gifski)
+pacman::p_load(scales, viridis, lubridate, ggthemes, gridExtra, tidyverse, readxl, knitr, plotly,data.table, readxl, lubridate, stringr, dplyr, gganimate, transformr, patchwork, sunburstR, d3r)
 ```
 
-### Load the Data
+## Load the Data
 
-For the purpose of this Take-home exercise, *outputFile.xlsx* will be used. This data file consists merchandise import and export by region/market monthly.
+We have downloaded the Merchandise Trade by Region/Market data from DOS and name it as *outputFile.xlsx*. This data file consists merchandise import and export by region/market monthly.
 
-import *outputFile.xlsx* file into R environment and called the data frame as import and export.
+We import *outputFile.xlsx* file into R environment, called the data frame as import and export and select the relevant rows by using *read_excel()* function.
 
 ```{r}
 import <- read_excel("data/outputFile.xlsx", sheet = "T1", range = "A10:AL129")
 export <- read_excel("data/outputFile.xlsx", sheet = "T2", range = "A10:AL101")
 ```
 
-As there are 2 types of data in the import and output data frame:
+## Data Preparation
 
--   Trade by Continent (in Millions)
+There are 3 types of data in the import and output data frame:
 
--   Trade by Country (in Thousands)
+-   **Trade by Continent (in Millions)**
 
-Hence we will create separate data frame for these two types of trade data for separate analysis.
+-   **Trade by Country (in Thousands)**
+
+-   **Total Merchandise Trade (in Thousands)**
+
+Hence we will create separate data frame for these 3 types of trade data for separate analysis.
 
 We will filter the data for the relevant time period (**January 2020 to December 2022**)
 
 ::: panel-tabset
-### Import
+### Import -Continent
 
 **For Import Trade by Continents (Million Dollars)**
 
 ```{r}
 #| code-fold: true
-import_continent <- import[1:7, ]%>%
+import_continent <- import[2:7, ]%>%
     select(`Data Series`, contains(c("2020", "2021", "2022"))) %>%
-    slice(-1) %>%
   set_names(if_else(names(.) == "Data Series", "Country", names(.)))
 
 import_continent$Country <- gsub("\\s*\\(.*?\\)", "", import_continent$Country)
 
 ```
 
-### Export
+### Export -Continent
 
 **For Export Trade by Continents (Million Dollars)**
 
 ```{r}
 #| code-fold: true
-export_continent <- export[1:7, ]%>%
+export_continent <- export[2:7, ]%>%
     select(`Data Series`, contains(c("2020", "2021", "2022"))) %>%
-    slice(-1) %>%
   set_names(if_else(names(.) == "Data Series", "Country", names(.)))
 
 export_continent$Country <- gsub("\\s*\\(.*?\\)", "", export_continent$Country)
@@ -73,7 +77,7 @@ export_continent$Country <- gsub("\\s*\\(.*?\\)", "", export_continent$Country)
 :::
 
 ::: panel-tabset
-### Import
+### Import -Country
 
 **For Import Trade by Countries (Thousand Dollars)**
 
@@ -81,14 +85,13 @@ export_continent$Country <- gsub("\\s*\\(.*?\\)", "", export_continent$Country)
 #| code-fold: true
 import_country <- import[8:119, ]%>%
     select(`Data Series`, contains(c("2020", "2021", "2022"))) %>%
-    slice(-1) %>%
   set_names(if_else(names(.) == "Data Series", "Country", names(.)))
 
 import_country$Country <- gsub("\\s*\\(.*?\\)", "", import_country$Country)
 
 ```
 
-### Export
+### Export -Country
 
 **For Export Trade** **Countries (Thousand Dollars)**
 
@@ -96,7 +99,6 @@ import_country$Country <- gsub("\\s*\\(.*?\\)", "", import_country$Country)
 #| code-fold: true
 export_country <- export[8:91, ]%>%
     select(`Data Series`, contains(c("2020", "2021", "2022"))) %>%
-    slice(-1) %>%
   set_names(if_else(names(.) == "Data Series", "Country", names(.)))
 
 export_country$Country <- gsub("\\s*\\(.*?\\)", "", export_country$Country)
@@ -104,12 +106,47 @@ export_country$Country <- gsub("\\s*\\(.*?\\)", "", export_country$Country)
 ```
 :::
 
-### Clean and transform data
+::: panel-tabset
+### Import -Total
 
-Dataset Pivot
+**For Total Import Trade (Thousand Dollars)**
 
 ```{r}
-#Continent Data
+#| code-fold: true
+import_total <- import[1, ]%>%
+    select(`Data Series`, contains(c("2020", "2021", "2022"))) %>%
+  set_names(if_else(names(.) == "Data Series", "Country", names(.)))
+
+import_total$Country <- gsub("\\s*\\(.*?\\)", "", import_total$Country)
+
+```
+
+### Export -Total
+
+**For Total Export Trade (Thousand Dollars)**
+
+```{r}
+#| code-fold: true
+export_total <- export[1, ]%>%
+    select(`Data Series`, contains(c("2020", "2021", "2022"))) %>%
+  set_names(if_else(names(.) == "Data Series", "Country", names(.)))
+
+export_total$Country <- gsub("\\s*\\(.*?\\)", "", export_total$Country)
+
+```
+:::
+
+### Clean and transform data
+
+Next we will reshape the data into long format with Country, Month-Year and Value as column names.
+
+We will also format Month-Year into data format using *as.Date()* function for graph plotting.
+
+::: panel-tabset
+### Continent
+
+```{r}
+#| code-fold: true
 continent_i <- reshape2::melt(import_continent, id.vars = "Country", 
                                    variable.name = "Month-Year", value.name = "Value", 
                                    na.rm = TRUE)
@@ -119,8 +156,12 @@ continent_e <- reshape2::melt(export_continent, id.vars = "Country",
                                    variable.name = "Month-Year", value.name = "Value", 
                                    na.rm = TRUE)
 continent_e$`Month-Year` <- as.Date(paste(continent_e$`Month-Year`, "01"), format = "%Y %b %d")
+```
 
-#Country Data
+### Country
+
+```{r}
+#| code-fold: true
 country_i <- reshape2::melt(import_country, id.vars = "Country", 
                                    variable.name = "Month-Year", value.name = "Value", 
                                    na.rm = TRUE)
@@ -133,44 +174,141 @@ country_e <- reshape2::melt(export_country, id.vars = "Country",
 country_e$`Month-Year` <- as.Date(paste(country_e$`Month-Year`, "01"), format = "%Y %b %d")
 ```
 
-Merge Data Frame
+### Total
 
 ```{r}
-#For Continent Data
+#| code-fold: true
+total_i <- reshape2::melt(import_total, id.vars = "Country", 
+                                   variable.name = "Month-Year", value.name = "Value", 
+                                   na.rm = TRUE)
+total_i$`Month-Year` <- as.Date(paste(total_i$`Month-Year`, "01"), format = "%Y %b %d")
+
+total_e <- reshape2::melt(export_total, id.vars = "Country", variable.name = "Month-Year",
+                          value.name = "Value",  na.rm = TRUE)
+total_e$`Month-Year` <- as.Date(paste(total_e$`Month-Year`, "01"), format = "%Y %b %d")
+```
+:::
+
+### Merge Data Frame
+
+As now the import and export data are separate for continent, country and total trade, we will merge them by using merge() function. We will also create a new column *Net* to calculate the balance of trade (BOT = Export -Import).
+
+After the import and export data are merged into trade data, we will use *pivot_longer()* function to reshape the data into long format and also indicate whether the trade is import or export in an column named *Variable*.
+
+::: panel-tabset
+### Continent
+
+```{r}
+#| code-fold: true
 continent_trade <- merge(x=continent_i , y=continent_e, by= c("Country", "Month-Year"), all.x = TRUE, all.y = TRUE)
 continent_trade <- continent_trade%>%
   rename(Import = Value.x, Export = Value.y) %>%
-  mutate(Net = Import - Export)
+  mutate(Net = Export - Import)
 
-#For Country Data
+continent_trade_long <- continent_trade %>%
+  pivot_longer(cols = c("Import", "Export"), names_to = "Variable", values_to = "Value")
+```
+
+### Country
+
+```{r}
+#| code-fold: true
 country_trade <- merge(x=country_i , y=country_e, by= c("Country", "Month-Year"), na.rm = TRUE)
 country_trade <- country_trade%>%
   rename(Import = Value.x, Export = Value.y) %>%
-  mutate(Net = Import - Export)
+  mutate(Net = Export - Import)
+
+country_trade_long <- country_trade %>%
+  pivot_longer(cols = c("Import", "Export"), names_to = "Variable", values_to = "Value")
 ```
 
-Plot a stacked bar graph to visualize trade by continent
+### Total
 
 ```{r}
-# Reshape data from wide to long format
-continent_trade_long <- continent_trade %>%
-  pivot_longer(cols = c("Import", "Export"), names_to = "variable", values_to = "value")
+#| code-fold: true
+total_trade <- bind_rows(total_i %>% mutate(Data = "Total Import"),
+                            total_e %>% mutate(Data = "Total Export"))
+```
+:::
 
-# Plot stacked bar chart
-ggplot(continent_trade_long, aes(x = `Month-Year`, y = `value`, fill = variable)) +
-  geom_col() +
-  facet_wrap(~ Country, ncol = 2) +
-  scale_fill_manual(values = c("salmon", "lightblue")) +
-  labs(title = "Import and Export Values Over Time by Continent",
-       x = "Month-Year", y = "Value", fill = "") +
-  theme_minimal()
+### Overview of Cleaned Data
 
+Now we have the cleaned data. We will use head() function to have an overview.
+
+```{r}
+head(continent_trade_long)
 ```
 
-Plot an animated scatter plot to show import and export values for different countries over time
+```{r}
+head(country_trade_long)
+```
 
 ```{r}
-p <- ggplot(continent_trade, aes(x = Import, y = Export, size = Net, color = Country)) +
+head(total_trade)
+```
+
+## Data Exploration and Data Visualization
+
+### 1. Total Trade over Time
+
+Firstly, let us look at total trade over time in Singapore to understand the general trend for import and export, and also the impact of Covid19 to Singapore trade in general.
+
+#### Line Chart for Total Import and Export from 2020 to 2022
+
+Plot a line graph to show total Import and Export Trade Value over time.
+
+```{r}
+p1 <- ggplot(data = total_trade,
+       aes(x = `Month-Year`,
+           y = `Value`)) +
+  geom_line(aes(colour = `Data`)) +
+  labs(title = "Singapore Total Import and Export from 2020 to 2022") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplotly(p1)
+```
+
+[**Observation**]{.underline}
+
+In general, there is an upward trend for both import and export in Singapore over time.
+
+The total export is higher than the total import throughout all year. This indicates a positive balance of trade in Singapore with an active foreign market.
+
+Even though there are some impact on trade volume due to Covid19, for example, a dip in export and import from Mar to May 2020 due to Circuit Breaker (CB) in Singapore, the overall trend and trend volume is not heavily affected due to pandemic situation.
+
+### 2. Trade by Continent over Time
+
+After understanding the general trend for total import and export in Singapore, we will dive into import and export by continent from 2020 to 2022.
+
+#### Interactive Stacked Bar Chart for Import and Export by Continent from 2020 to 2022
+
+As there are import and export for each continent, we will plot a stacked bar graph to visualize total trade volume by continent. We will also use *ggplotly()* to introduce interactivity to the plot. This will help us to see different continent trade performance over time at one glance.
+
+```{r}
+p2 <- ggplot(continent_trade_long, aes(x = `Month-Year`, y = `Value`, fill = Variable, 
+                                       text = paste("Variable: ", Variable))) +
+      geom_col() +
+      facet_wrap(~ Country, ncol = 2) +
+      scale_fill_manual(values = c("salmon", "lightblue")) +
+      labs(title = "Import and Export Values Over Time by Continent",
+           x = "Month-Year", y = "Value", fill = "") +
+      theme_minimal()
+
+ggplotly(p2)
+```
+
+[**Observation**]{.underline}
+
+From the stacked bar chart, we observe that Asia contributes the most in terms of export and import to Singapore market. It remains as the top trading continent partner with Singapore across time.
+
+Following Asia, America and Europe Continent come in as second and third, followed by European Union, Oceania and Africa. The trade volume for America, Europe and European Union are similar.
+
+#### Animated Time Series Scatter Plot of Trade by Continent
+
+Plot an animated scatter plot to show import and export values for different continents over time
+
+```{r}
+p3 <- ggplot(continent_trade, aes(x = Import, y = Export, size = Net, color = Country)) +
   geom_point(alpha = 0.7) +
   scale_color_manual(values = rainbow(length(unique(continent_trade$Country)))) +
   scale_size_continuous(range = c(1, 10)) +
@@ -179,60 +317,82 @@ p <- ggplot(continent_trade, aes(x = Import, y = Export, size = Net, color = Cou
   transition_states(`Month-Year`) +
   ease_aes('linear')
 
-animate(p, fps = 10, duration = 10, width = 800, height = 600)
+animate(p3, fps = 10, duration = 10, width = 800, height = 600)
 
 ```
 
-**Looking into different countries**
+[**Observation**]{.underline}
+
+From the animation time series scatter plot, we can observe the trade pattern change for each continent over time. Asia has the most significant fluctuation in terms of import and export volume and ratio, whereas Africa has the least fluctuation.
+
+America is usually the second place in Import and Export in trade volume, but is overtaken by Europe in some months.
+
+### 3. Trade by Country over Time
+
+After understanding the different continent trading patterns, now we look at trade patterns by country from 2020 to 2022.
+
+From the data, we have over 80 countries and regions in total. Hence it will be difficult to use general charts such as line, bar or scatter plot to visualize the data. Hence we will explore Sunburst chart to visualize the proportion of Singapore's import and export trade with different countries/ regions.
+
+This chart shows multiple rings, with each ring representing a different level of the hierarchy. The innermost ring will represent the total amount of import or export, while the outer rings will represent the different countries/ regions with which Singapore trades. The size of each segment will represent the proportion of Singapore's trade with that trading partner.
+
+#### **Interactive Sunburst Chart of Trade by Country from 2020 to 2022**
 
 ```{r}
-# Create a function to generate the plot for each country
-plot_country <- function(country) {
-  # Filter the data for the current country
-  data <- country_trade %>% filter(Country == country)
-  
-  # Create the plot
-  p <- ggplot(data, aes(x = `Month-Year`)) +
-    geom_line(aes(y = Import, color = "Import")) +
-    geom_line(aes(y = Export, color = "Export")) +
-    scale_color_manual(name = "Value",
-                        values = c(Import = "blue", Export = "green")) +
-    labs(title = country,
-         x = "Month-Year",
-         y = "Value") +
-    transition_time(`Month-Year`) +
-    ease_aes('linear')
-  
-  # Return the plot
-  return(p)
-}
+country_hier <- country_trade_long %>%
+  group_by(Variable, Country) %>%
+  summarize(totalAmount = sum(`Value`))
 
-# Create a list of plots for each country
-plot_list <- lapply(unique(country_trade$Country), plot_country)
+country_sunburst <- d3_nest(country_hier, value_cols = "totalAmount")
 
-# Combine the list of plots into one animation
-animation <- plot_list[[1]]
-for (i in 2:length(plot_list)) {
-  animation <- animation + plot_list[[i]]
-}
+sunburst(data = country_sunburst,
+         valueField = "totalAmount",
+         height = 300,
+         width = "100%",
+         legend = FALSE) 
+```
 
-animation <- animation +
-  transition_reveal(Month.Year) +
-  labs(title = "Country: {closest_state}",
-       x = "Month-Year",
-       y = "Value") +
-  ease_aes('linear')
+[**Observation**]{.underline}
 
-# Animate the plot and save as a GIF
-animate(p, renderer = gifski_renderer(), width = 800, height = 600, fps = 10, duration = 10)
+This visualization can help to identify the countries that are most important for Singapore's import and export trade byy looking at the size of each segment.
 
-# Load the 'magick' package
-library(magick)
+For import, there are 4 important trading partners: Mainland China, Malaysia, Taiwan and United States, all contributing more than 5% of Singapore import volume.
+
+For export, the top 3 trading partners are Mainland China, Hong Kong and Malaysia, all contributing more than 5% of Singapore export volume. The United States comes in at 4th place at 4.98%.
+
+Mainland China is the top trading partner for both import and export in Singapore. Hence it is important to study the trading pattern of Mainland China as its variation will impact Singapore economy significantly.
+
+#### Cycle Plot for Mainland China
+
+```{r}
+china_trade_long <- subset(country_trade_long, Country == "Mainland China")
+
+china_trade_long$`Month-Year` <- as.Date(as.character(china_trade_long$`Month-Year`), format = "%Y-%m-%d")
+
+p4 <- ggplot(china_trade_long, aes(x = `Month-Year`, y = `Value`, group = Variable, color = Variable)) + 
+  geom_line() +
+  scale_x_date(limits = c(min(china_trade_long$`Month-Year`), max(china_trade_long$`Month-Year`))) + 
+  labs(x = "Month-Year", y = "Value", title = "Import and Export Value for Mainland China") +
+  theme(axis.text.x = element_text( size =8))
+
+p4 %>% 
+  ggplotly() %>% 
+  layout(hovermode = "x unified") %>% 
+  add_annotations(xref = "paper", yref = "paper", x = 0.5, y = -0.15,
+                  text = "",
+                  showarrow = FALSE, font = list(size = 14))
 
 ```
 
-After clean and transform the data, we will create a time series plot for Singapore's bi-lateral trade using ggplot2 package. We will plot the annual total value of imports and exports for each trading partner. We will rank the counties/ regions by their total trade volume.
+[**Observation**]{.underline}
 
-We will plot the total value of imports, exports, and trade balance over time of each trading partner to understand if there is a trend.
+Import and Export volume with Mainland China and Singapore has some fluctuations over time. There are several significant dips in Feb 2020, Feb 2021 and Feb 2022. This could be due to Chinese New Year long holiday and short month in Feburary, causing a significant dip in trade volume.
+
+From Jul 2020 to Apr 2022, there is in general a positive trade of balance with China with more export than import (except in Jan/Feb 2021). However, the import from China has been picking up rapidly since Feb 2022. This could be due to pandemic situation as Mainland China has a lock-down policy.
 
 # Major Observations
+
+1.  From total trade value perspective, Singapore's import and export have been on an upward trend over time. The total export is higher than the import, showing an active foreign market and positive balance of trade. Despite some impact from COVID-19, the trend and volume of trade have not been heavily affected.
+2.  From continent perspective, Asia is the top trading partner with Singapore for both imports and exports over time, followed by America and Europe. The European Union, Oceania, and Africa have lower trade volumes. The trade patterns for each continent change over time, with Asia having the most significant fluctuation and Africa the least. America is usually the second-largest trading partner, but Europe overtakes it in some months.
+3.  Down to country/ region trading level, the visualization highlights Singapore's important import and export partners. Mainland China, Malaysia, Taiwan, and the United States are crucial import partners, while Mainland China, Hong Kong, and Malaysia are crucial export partners. Mainland China is Singapore's top trading partner for both import and export.
+
+The above concludes my Take-Home Exercise 4. Thank you for reading!
